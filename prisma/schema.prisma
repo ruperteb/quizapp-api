@@ -1,0 +1,70 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int        @id @default(autoincrement())
+  email       String     @unique
+  name        String
+  role        String
+  userQuizzes UserQuiz[]
+  quizzes     Quiz[]
+  questions   Question[]
+}
+
+model Quiz {
+  id            Int            @id @default(autoincrement())
+  title         String
+  topic         String
+  difficulty    Int
+  createdAt     DateTime
+  userQuizzes   UserQuiz[]
+  quizQuestions QuizQuestion[]
+  user          User?          @relation(fields: [userId], references: [id])
+  userId        Int?
+}
+
+model UserQuiz {
+  user     User   @relation(fields: [userId], references: [id])
+  userId   Int
+  quiz     Quiz   @relation(fields: [quizId], references: [id])
+  quizId   Int
+  status   String
+  progress Float
+  score    Int
+
+  @@id([userId, quizId])
+}
+
+model Question {
+  id            Int            @id @default(autoincrement())
+  description   String
+  text          String
+  answer        String
+  topic         String
+  difficulty    Int
+  createdAt     DateTime
+  quizQuestions QuizQuestion[]
+  user          User?          @relation(fields: [userId], references: [id])
+  userId        Int?
+}
+
+model QuizQuestion {
+  quiz       Quiz     @relation(fields: [quizId], references: [id])
+  quizId     Int
+  question   Question @relation(fields: [questionId], references: [id])
+  questionId Int
+  userAnswer String   @default("")
+  answered   Boolean
+  correct    Boolean
+
+  @@id([quizId, questionId])
+}
