@@ -17,6 +17,7 @@ exports.getUser = async (req, res) => {
                 quizQuestions: {
                   include: {
                     question: true,
+                    userAnswers: { where: { userId: userId } },
                   },
                 },
               },
@@ -27,7 +28,74 @@ exports.getUser = async (req, res) => {
         questions: true,
       },
     });
-    res.json(user);
+    const userQuizzesData = user.userQuizzes.map((userQuiz) => {
+      const tempQuizQuestionsData = userQuiz.quiz.quizQuestions.map(
+        (quizQuestion) => ({
+          questionId: quizQuestion.questionId,
+          userAnswer: quizQuestion.userAnswers[0]?.userAnswer,
+          answeredAt: quizQuestion.userAnswers[0]?.answeredAt,
+          description: quizQuestion.question.description,
+          correctAnswer: quizQuestion.question.correctAnswer,
+        })
+      );
+
+      const score = 0;
+      const total = tempQuizQuestionsData.length;
+      const attempted = [];
+
+      for (question of tempQuizQuestionsData) {
+        if (question.userAnswer) {
+          attempted.push(question.questionId);
+          if (question.userAnswer === question.correctAnswer) {
+            score += 1;
+          }
+        }
+      }
+
+      const getStatus = () => {
+        if (attempted.length < total) {
+          return "incomplete";
+        }
+        return "complete";
+      };
+
+      const tempUserQuizData = {
+        userId: userQuiz.userId,
+        quizId: userQuiz.quizId,
+        status: getStatus(),
+        progress: `${attempted.length}/${total}`,
+        score: score,
+        title: userQuiz.quiz.title,
+        createdAt: userQuiz.quiz.createdAt,
+        quizQuestions: tempQuizQuestionsData,
+      };
+      return tempUserQuizData;
+    });
+
+    const quizzesData = user.quizzes.map((quiz) => ({
+      quizId: quiz.id,
+      title: quiz.title,
+      createdAt: quiz.createdAt,
+      createdBy: quiz.userId,
+    }));
+
+    const questionsData = user.questions.map((question) => ({
+      questionId: question.id,
+      description: question.description,
+      correctAnswer: question.correctAnswer,
+      createdAt: question.createdAt,
+      createdBy: question.userId,
+    }));
+    const data = {
+      userId: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      userQuizzes: userQuizzesData,
+      quizzes: quizzesData,
+      questions: questionsData,
+    };
+    res.json(data);
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       console.log("code", e.code);

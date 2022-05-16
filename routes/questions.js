@@ -10,5 +10,6 @@ router.all("*", checkJwt, jsonParser);
 router.get("/getAllQuestions", questionsController.getAllQuestions);
 router.post("/createQuestion", questionsController.createQuestion);
 router.put("/assignQuestion", questionsController.assignQuestion);
+router.post("/updateUserAnswer", questionsController.updateUserAnswer);
 
 module.exports = router;
