@@ -61,37 +61,55 @@ exports.getUserQuizzes = async (req, res) => {
         },
       },
       include: {
-        quiz: { include: { quizQuestions: { include: { question: true } } } },
+        quiz: { include: { quizQuestions: { include: { question: true, userAnswers: { where: { userId: userId } } } } } },
       },
     });
 
-    const data = quizzes.map((quiz) => {
-      /* const questionsData = quiz.quiz.quizQuestions.map((item) => ({
-        questionId: item.questionId,
-        userAnswer: item.userAnswer,
-        answered: item.answered,
-        correct: item.correct,
-        description: item.question.description,
-        text: item.question.text,
-        answer: item.question.answer,
-        topic: item.question.topic,
-        difficulty: item.question.difficulty,
-      })); */
+    const quizzesData = quizzes.map((quiz) => {
+      
 
+      const questionsData = quiz.quiz.quizQuestions.map((question) => ({
+        questionId: question.questionId,
+        userAnswer: question.userAnswers[0]?.userAnswer,
+        answeredAt: question.userAnswers[0]?.answeredAt,
+        description: question.question.description,
+        correctAnswer: question.question.correctAnswer,
+      }));
+  
+      let score = 0;
+      const total = questionsData.length;
+      const attempted = [];
+  
+      for (question of questionsData) {
+        if (question.userAnswer) {
+          attempted.push(question.questionId);
+          if (question.userAnswer === question.correctAnswer) {
+            score += 1;
+          }
+        }
+      }
+  
+      const getStatus = () => {
+        if (attempted.length < total) {
+          return "incomplete";
+        }
+        return "complete";
+      };
+  
       const quizData = {
         userId: quiz.userId,
         quizId: quiz.quizId,
-        /* status: quiz.status,
-        progress: quiz.progress,
-        score: quiz.score, */
+        status: getStatus(),
+        progress: `${attempted.length}/${total}`,
+        score: score,
         title: quiz.quiz.title,
         createdAt: quiz.quiz.createdAt,
         /* questions: questionsData, */
       };
-      return quizData;
+      return quizData
     });
 
-    res.json(data);
+    res.json(quizzesData);
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       console.log("code", e.code);
@@ -107,7 +125,7 @@ exports.getUserQuiz = async (req, res) => {
   const userId = req.body.userId;
   const quizId = req.body.quizId;
   try {
-    const quizzes = await prisma.userQuiz.findUnique({
+    const quiz = await prisma.userQuiz.findUnique({
       where: {
         userId_quizId: {
           userId: userId,
@@ -128,19 +146,19 @@ exports.getUserQuiz = async (req, res) => {
       },
     });
 
-    if (quizzes === null) {
+    if (quiz === null) {
       throw "Invalid userId and quizId combination";
     }
 
-    const questionsData = quizzes.quiz.quizQuestions.map((item) => ({
-      questionId: item.questionId,
-      userAnswer: item.userAnswers[0]?.userAnswer,
-      answeredAt: item.userAnswers[0]?.answeredAt,
-      description: item.question.description,
-      correctAnswer: item.question.correctAnswer,
+    const questionsData = quiz.quiz.quizQuestions.map((question) => ({
+      questionId: question.questionId,
+      userAnswer: question.userAnswers[0]?.userAnswer,
+      answeredAt: question.userAnswers[0]?.answeredAt,
+      description: question.question.description,
+      correctAnswer: question.question.correctAnswer,
     }));
 
-    const score = 0;
+    let score = 0;
     const total = questionsData.length;
     const attempted = [];
 
@@ -161,13 +179,13 @@ exports.getUserQuiz = async (req, res) => {
     };
 
     const quizData = {
-      userId: quizzes.userId,
-      quizId: quizzes.quizId,
+      userId: quiz.userId,
+      quizId: quiz.quizId,
       status: getStatus(),
       progress: `${attempted.length}/${total}`,
       score: score,
-      title: quizzes.quiz.title,
-      createdAt: quizzes.quiz.createdAt,
+      title: quiz.quiz.title,
+      createdAt: quiz.quiz.createdAt,
       questions: questionsData,
     };
 

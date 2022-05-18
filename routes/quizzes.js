@@ -1,12 +1,13 @@
 const express = require("express");
 
 const { jsonParser } = require("../middleware/bodyparser");
-const { checkJwt } = require("../middleware/auth");
 const router = express.Router();
+
+const keycloak = require('../config/keycloak-config.js').getKeycloak();
 
 var quizzesController = require("../controllers/quizzes");
 
-router.all("*", checkJwt, jsonParser);
+router.all("*", keycloak.protect(['quizTaker', 'quizMaker']), jsonParser);
 router.get("/getAllQuizzes", quizzesController.getAllQuizzes);
 router.get("/getQuizzes", quizzesController.getQuizzes);
 router.get("/getUserQuizzes", quizzesController.getUserQuizzes);
