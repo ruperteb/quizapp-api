@@ -3,13 +3,23 @@ var Keycloak = require('keycloak-connect');
 
 let _keycloak;
 
-var keycloakConfig = {
+/* var keycloakConfig = {
     clientId: 'nodejs_quizApp',
     bearerOnly: true,
     serverUrl: 'http://localhost:8080/auth',
     realm: 'Quiz%20App',
     credentials: {
         secret: '6jtysAXuXe51SK2fRyBxtzL0WnTdvBtJ'
+    }
+}; */
+
+var keycloakConfig = {
+    clientId: process.env.KEYCLOAK_CLIENTID,
+    bearerOnly: true,
+    serverUrl: process.env.KEYCLOAK_SERVER_URL,
+    realm: process.env.KEYCLOAK_REALM,
+    credentials: {
+        secret: process.env.KEYCLOAK_CLIENT_SECRET
     }
 };
 
