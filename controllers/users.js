@@ -10,6 +10,7 @@ exports.getUser = async (req, res) => {
         id: userId,
       },
       include: {
+        roles: true,
         userQuizzes: {
           include: {
             quiz: {
@@ -28,6 +29,9 @@ exports.getUser = async (req, res) => {
         questions: true,
       },
     });
+
+    const rolesData = user.roles.map((role) => role.role);
+
     const userQuizzesData = user.userQuizzes.map((userQuiz) => {
       const tempQuizQuestionsData = userQuiz.quiz.quizQuestions.map(
         (quizQuestion) => ({
@@ -39,7 +43,7 @@ exports.getUser = async (req, res) => {
         })
       );
 
-      const score = 0;
+      let score = 0;
       const total = tempQuizQuestionsData.length;
       const attempted = [];
 
@@ -90,7 +94,7 @@ exports.getUser = async (req, res) => {
       userId: user.id,
       email: user.email,
       name: user.name,
-      role: user.role,
+      roles: rolesData,
       userQuizzes: userQuizzesData,
       quizzes: quizzesData,
       questions: questionsData,
@@ -109,8 +113,22 @@ exports.getUser = async (req, res) => {
 
 exports.getUsers = async (req, res) => {
   try {
-    const users = await prisma.user.findMany();
-    res.json(users);
+    const users = await prisma.user.findMany({
+      include: {
+        roles: true,
+      },
+    });
+    const data = users.map((user) => {
+      const rolesData = user.roles.map((role) => role.role);
+      const userData = {
+        userId: user.id,
+        email: user.email,
+        name: user.name,
+        roles: rolesData,
+      };
+      return userData;
+    });
+    res.json(data);
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       console.log("code", e.code);
@@ -123,14 +141,22 @@ exports.getUsers = async (req, res) => {
 };
 
 exports.createUser = async (req, res) => {
-  const userData = req.body;
+  const userId = req.body.id;
+  const userName = req.body.name;
+  const userEmail = req.body.email;
+  const userRoles = req.body.roles;
+
+  const userRolesArray = userRoles.map((role) => ({ role: role }));
 
   try {
     await prisma.user.create({
       data: {
-        name: userData.name,
-        email: userData.email,
-        role: userData.role,
+        id: userId,
+        name: userName,
+        email: userEmail,
+        roles: {
+          create: userRolesArray,
+        },
       },
     });
     res.json({

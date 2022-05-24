@@ -11,13 +11,20 @@ datasource db {
 }
 
 model User {
-  id          Int        @id @default(autoincrement())
+  id          String     @id
   email       String     @unique
   name        String
-  role        String
+  roles       Role[]
   userQuizzes UserQuiz[]
   quizzes     Quiz[]
   questions   Question[]
+}
+
+model Role {
+  id     Int     @id @default(autoincrement())
+  role   String
+  user   User?   @relation(fields: [userId], references: [id])
+  userId String?
 }
 
 model Quiz {
@@ -27,12 +34,12 @@ model Quiz {
   userQuizzes   UserQuiz[]
   quizQuestions QuizQuestion[]
   createdBy     User?          @relation(fields: [userId], references: [id])
-  userId        Int?
+  userId        String?
 }
 
 model UserQuiz {
   user       User     @relation(fields: [userId], references: [id])
-  userId     Int
+  userId     String
   quiz       Quiz     @relation(fields: [quizId], references: [id])
   quizId     Int
   assignedAt DateTime
@@ -48,7 +55,7 @@ model Question {
   createdAt     DateTime
   quizQuestions QuizQuestion[]
   createdBy     User?          @relation(fields: [userId], references: [id])
-  userId        Int?
+  userId        String?
 }
 
 model QuizQuestion {
@@ -64,7 +71,7 @@ model QuizQuestion {
 
 model UserAnswer {
   userQuiz     UserQuiz     @relation(fields: [userId, quizId], references: [userId, quizId])
-  userId       Int
+  userId       String
   quizId       Int
   quizQuestion QuizQuestion @relation(fields: [quizId, questionId], references: [quizId, questionId])
   questionId   Int
