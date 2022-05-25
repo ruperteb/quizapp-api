@@ -17,11 +17,11 @@ var allowCrossDomain = function (req, res, next) {
   next();
 };
 
-app.use(allowCrossDomain);
-
 app.use("/users/", users);
 app.use("/quizzes/", quizzes);
 app.use("/questions/", questions);
+
+app.use(allowCrossDomain);
 
 app.listen(process.env.PORT, () => {
   console.log(`Example app listening on port ${process.env.PORT}`);
