@@ -6,7 +6,12 @@ const keycloak = require("./config/keycloak-config.js").initKeycloak();
 
 app.use(keycloak.middleware());
 
-app.use(cors());
+app.use(
+  cors({
+    credentials: true,
+    origin: ["http://localhost:3000"],
+  })
+);
 
 const users = require("./routes/users");
 const quizzes = require("./routes/quizzes");
