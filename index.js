@@ -1,6 +1,6 @@
 require("dotenv").config();
 const express = require("express");
-/* var cors = require("cors"); */
+var cors = require("cors");
 const app = express();
 const keycloak = require("./config/keycloak-config.js").initKeycloak();
 
