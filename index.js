@@ -6,7 +6,7 @@ const keycloak = require("./config/keycloak-config.js").initKeycloak();
 
 app.use(
   cors({
-    origin: ["http://localhost:3000"],
+    origin: true,
   })
 );
 
