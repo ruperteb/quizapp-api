@@ -30,7 +30,12 @@ module.exports = headers;
 
 router.all("*", keycloak.protect(["quizTaker", "quizMaker"]), jsonParser);
 router.get("/getUser", usersController.getUser);
-router.get("/getUserWithToken", cors(), headers, usersController.getUserWithToken);
+router.get(
+  "/getUserWithToken",
+  cors({ credentials: true, origin: true, exposedHeaders: "*" }),
+  headers,
+  usersController.getUserWithToken
+);
 router.get("/getUsers", usersController.getUsers);
 router.post("/createUser", usersController.createUser);
 
