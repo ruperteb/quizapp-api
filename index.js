@@ -6,14 +6,14 @@ const keycloak = require("./config/keycloak-config.js").initKeycloak();
 
 app.use(keycloak.middleware());
 
-/* app.use(
+app.use(
   cors({
     credentials: true,
-    origin: ["http://localhost:3000"],
+    origin: ["http://localhost:3000/"],
   })
-); */
+);
 
-app.use(cors());
+/* app.use(cors()); */
 
 const users = require("./routes/users");
 const quizzes = require("./routes/quizzes");
