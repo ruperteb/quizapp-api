@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 
 const { jsonParser } = require("../middleware/bodyparser");
 const router = express.Router();
@@ -29,7 +30,7 @@ module.exports = headers;
 
 router.all("*", keycloak.protect(["quizTaker", "quizMaker"]), jsonParser);
 router.get("/getUser", usersController.getUser);
-router.get("/getUserWithToken", headers, usersController.getUserWithToken);
+router.get("/getUserWithToken", cors(), headers, usersController.getUserWithToken);
 router.get("/getUsers", usersController.getUsers);
 router.post("/createUser", usersController.createUser);
 
