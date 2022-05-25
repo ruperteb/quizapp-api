@@ -4,8 +4,6 @@ const express = require("express");
 const app = express();
 const keycloak = require("./config/keycloak-config.js").initKeycloak();
 
-app.use(keycloak.middleware());
-
 var allowCrossDomain = function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
@@ -19,6 +17,8 @@ var allowCrossDomain = function (req, res, next) {
   }
 };
 app.use(allowCrossDomain);
+
+app.use(keycloak.middleware());
 
 /* app.use(
   cors({
