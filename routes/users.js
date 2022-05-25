@@ -9,6 +9,7 @@ var usersController = require("../controllers/users");
 
 router.all("*", keycloak.protect(['quizTaker', 'quizMaker']), jsonParser);
 router.get("/getUser", usersController.getUser);
+router.get("/getUserWithToken", usersController.getUserWithToken);
 router.get("/getUsers", usersController.getUsers);
 router.post("/createUser", usersController.createUser);
 
