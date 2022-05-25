@@ -6,7 +6,7 @@ const keycloak = require("./config/keycloak-config.js").initKeycloak();
 
 app.use(keycloak.middleware());
 
-app.options("/*", cors());
+app.options("/*/*", cors());
 
 app.use(cors());
 
