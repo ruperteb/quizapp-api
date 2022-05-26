@@ -3,7 +3,7 @@ const { Prisma, PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 exports.getUser = async (req, res) => {
-  const userId = req.body.userId;
+  const userId = req.query.userId;
   try {
     const user = await prisma.user.findUnique({
       where: {
