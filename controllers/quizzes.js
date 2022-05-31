@@ -24,7 +24,7 @@ exports.getAllQuizzes = async (req, res) => {
 };
 
 exports.getQuizzes = async (req, res) => {
-  const userId = req.query.userId;
+  const userId = Number(req.query.userId);
   try {
     const quizzes = await prisma.quiz.findMany({
       where: {
@@ -52,7 +52,7 @@ exports.getQuizzes = async (req, res) => {
 };
 
 exports.getUserQuizzes = async (req, res) => {
-  const userId = req.query.userId;
+  const userId = Number(req.query.userId);
   try {
     const quizzes = await prisma.userQuiz.findMany({
       where: {
@@ -122,7 +122,7 @@ exports.getUserQuizzes = async (req, res) => {
 };
 
 exports.getUserQuiz = async (req, res) => {
-  const userId = req.query.userId;
+  const userId = Number(req.query.userId);
   const quizId = Number(req.query.quizId);
   try {
     const quiz = await prisma.userQuiz.findUnique({

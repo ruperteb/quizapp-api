@@ -3,7 +3,7 @@ const { Prisma, PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 exports.getUser = async (req, res) => {
-  const userId = req.query.userId;
+  const userId = Number(req.query.userId);
   try {
     const user = await prisma.user.findUnique({
       where: {
@@ -112,36 +112,36 @@ exports.getUser = async (req, res) => {
 };
 
 exports.getUserWithToken = async (req, res) => {
-  const userId = req.kauth.grant.access_token.content.sub;
+  const keycloakId = req.kauth.grant.access_token.content.sub;
   try {
     const user = await prisma.user.findUnique({
       where: {
-        id: userId,
+        keycloakId: keycloakId,
       },
       include: {
         roles: true,
-        userQuizzes: {
+        /*  userQuizzes: { // need to make a seperate query with user id to get all of this stuff
           include: {
             quiz: {
               include: {
                 quizQuestions: {
                   include: {
                     question: true,
-                    userAnswers: { where: { userId: userId } },
+                    userAnswers: { where: { keycloakId: keycloakId } }, 
                   },
                 },
               },
             },
           },
-        },
-        quizzes: true,
-        questions: true,
+        }, */
+        /* quizzes: true,
+        questions: true, */
       },
     });
 
     const rolesData = user.roles.map((role) => role.role);
 
-    const userQuizzesData = user.userQuizzes.map((userQuiz) => {
+  /*   const userQuizzesData = user.userQuizzes.map((userQuiz) => {
       const tempQuizQuestionsData = userQuiz.quiz.quizQuestions.map(
         (quizQuestion) => ({
           questionId: quizQuestion.questionId,
@@ -198,15 +198,15 @@ exports.getUserWithToken = async (req, res) => {
       correctAnswer: question.correctAnswer,
       createdAt: question.createdAt,
       createdBy: question.userId,
-    }));
+    })); */
     const data = {
       userId: user.id,
       email: user.email,
       name: user.name,
       roles: rolesData,
-      userQuizzes: userQuizzesData,
+      /* userQuizzes: userQuizzesData,
       quizzes: quizzesData,
-      questions: questionsData,
+      questions: questionsData, */
     };
     res.json(data);
   } catch (e) {
@@ -250,7 +250,7 @@ exports.getUsers = async (req, res) => {
 };
 
 exports.createUser = async (req, res) => {
-  const userId = req.body.id;
+  const keycloakId = req.body.keycloakId;
   const userName = req.body.name;
   const userEmail = req.body.email;
   const userRoles = req.body.roles;
@@ -260,7 +260,7 @@ exports.createUser = async (req, res) => {
   try {
     await prisma.user.create({
       data: {
-        id: userId,
+        keycloakId: keycloakId,
         name: userName,
         email: userEmail,
         roles: {
