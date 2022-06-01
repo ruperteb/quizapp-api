@@ -4,7 +4,7 @@ var cors = require("cors");
 const app = express();
 const keycloak = require("./config/keycloak-config.js").initKeycloak();
 
-app.use(cors({ origin: ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002","http://localhost:3003" ] })); // ! must be before keycloak middleware !
+app.use(cors({ origin: ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002","http://localhost:3003", "http://d37ucdf079eevn.cloudfront.net" ] })); // ! must be before keycloak middleware !
 
 app.use(keycloak.middleware());
 
