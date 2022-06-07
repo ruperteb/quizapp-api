@@ -51,6 +51,53 @@ exports.getQuizzes = async (req, res) => {
   }
 };
 
+exports.getQuiz = async (req, res) => {
+  const quizId = Number(req.query.quizId);
+  try {
+    const quiz = await prisma.quiz.findUnique({
+      where: {
+        id: quizId,
+      },
+      include: {
+        quizQuestions: {
+          include: {
+            question: true,
+          },
+        },
+      },
+    });
+
+    if (quiz === null) {
+      throw "Invalid quizId";
+    }
+
+    const questionsData = quiz.quizQuestions.map((question) => ({
+      questionId: question.questionId,
+      description: question.question.description,
+      correctAnswer: question.question.correctAnswer,
+      createdAt: question.question.createdAt,
+    }));
+
+    const quizData = {
+      quizId: quiz.quizId,
+      title: quiz.title,
+      createdBy: quiz.userId,
+      createdAt: quiz.createdAt,
+      questions: questionsData,
+    };
+
+    res.status(200).json(quizData);
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError) {
+      console.log("code", e.code);
+      res.status(500).send(`${e.code}`);
+    } else {
+      console.log("error", e);
+      res.status(500).send(`${e}`);
+    }
+  }
+};
+
 exports.getUserQuizzes = async (req, res) => {
   const userId = Number(req.query.userId);
   try {
