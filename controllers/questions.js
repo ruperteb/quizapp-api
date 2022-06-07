@@ -30,7 +30,7 @@ exports.createQuestion = async (req, res) => {
   const date = new Date().toISOString();
 
   try {
-    await prisma.question.create({
+    const question = await prisma.question.create({
       data: {
         description: questionData.description,
         correctAnswer: questionData.correctAnswer,
@@ -41,7 +41,11 @@ exports.createQuestion = async (req, res) => {
       },
     });
     res.json({
-      message: "Question Created",
+      questionId: question.id,
+      description: question.description,
+      correctAnswer: question.correctAnswer,
+      createdAt: question.createdAt,
+      createdBy: question.userId,
     });
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError) {

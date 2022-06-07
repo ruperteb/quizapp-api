@@ -61,13 +61,20 @@ exports.getUserQuizzes = async (req, res) => {
         },
       },
       include: {
-        quiz: { include: { quizQuestions: { include: { question: true, userAnswers: { where: { userId: userId } } } } } },
+        quiz: {
+          include: {
+            quizQuestions: {
+              include: {
+                question: true,
+                userAnswers: { where: { userId: userId } },
+              },
+            },
+          },
+        },
       },
     });
 
     const quizzesData = quizzes.map((quiz) => {
-      
-
       const questionsData = quiz.quiz.quizQuestions.map((question) => ({
         questionId: question.questionId,
         userAnswer: question.userAnswers[0]?.userAnswer,
@@ -75,11 +82,11 @@ exports.getUserQuizzes = async (req, res) => {
         description: question.question.description,
         correctAnswer: question.question.correctAnswer,
       }));
-  
+
       let score = 0;
       const total = questionsData.length;
       const attempted = [];
-  
+
       for (question of questionsData) {
         if (question.userAnswer) {
           attempted.push(question.questionId);
@@ -88,14 +95,14 @@ exports.getUserQuizzes = async (req, res) => {
           }
         }
       }
-  
+
       const getStatus = () => {
         if (attempted.length < total) {
           return "incomplete";
         }
         return "complete";
       };
-  
+
       const quizData = {
         userId: quiz.userId,
         quizId: quiz.quizId,
@@ -106,7 +113,7 @@ exports.getUserQuizzes = async (req, res) => {
         createdAt: quiz.quiz.createdAt,
         /* questions: questionsData, */
       };
-      return quizData
+      return quizData;
     });
 
     res.json(quizzesData);
@@ -207,7 +214,7 @@ exports.createQuiz = async (req, res) => {
   const date = new Date().toISOString();
 
   try {
-    await prisma.quiz.create({
+    const quiz = await prisma.quiz.create({
       data: {
         title: quizData.title,
         createdAt: date,
@@ -217,7 +224,10 @@ exports.createQuiz = async (req, res) => {
       },
     });
     res.json({
-      message: "Quiz created",
+      quizId: quiz.id,
+      title: quiz.title,
+      createdAt: quiz.createdAt,
+      createdBy: quiz.userId,
     });
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
